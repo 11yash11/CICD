@@ -1,0 +1,123 @@
+name: sf-devops-script-deployment
+
+# Controls when the action will run. 
+on:
+  push:
+    branches:
+      - main
+      - DEV
+      - DEMO
+      - PROD
+      - TEST
+    paths:
+      - 'snowflake-scripts/etl-pipeline/etl-scripts/**'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  deploy-snowflake-changes-job:
+    runs-on: ubuntu-latest
+
+    steps:
+    
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Use Python 3.8.x
+        uses: actions/setup-python@v2.2.1
+        with:
+          python-version: 3.8.x
+   
+      - name: Run schemachange for DEV
+        if: ${{ steps.extract_branch.outputs.branch == 'DEV' }}
+        env:
+          SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}
+          SF_USERNAME: ${{ secrets.DEV_USERNAME }}
+          SF_ROLE: ${{ secrets.DEV_ROLE }}
+          SF_WAREHOUSE: ${{ secrets.DEV_WH }}
+          SF_DATABASE: ${{ secrets.DEV_DATABASE }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.DEV_PASSWORD }}          
+          BRANCH_NAME_FOR_CONFIG: ${{ steps.extract_branch.outputs.branch }}
+        
+        run: |
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          python --version
+          echo "Step 1: Installing schemachange"
+          pip install schemachange
+          
+          echo "Step 2: Running schemachange"
+          schemachange --config-folder snowflake-scripts/etl-pipeline/yaml-configs-for-etl-scripts -f $GITHUB_WORKSPACE/snowflake-scripts/etl-pipeline/etl-scripts -a $SF_ACCOUNT -u $SF_USERNAME -r $SF_ROLE -w $SF_WAREHOUSE -d $SF_DATABASE -c $SF_DATABASE.SCHEMACHANGE_DEV.CHANGE_HISTORY --create-change-history-table
+
+      
+      - name: Run schemachange for DEMO
+        if: ${{ steps.extract_branch.outputs.branch == 'DEMO' }}
+        env:
+          SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}
+          SF_USERNAME: ${{ secrets.DEMO_USERNAME }}
+          SF_ROLE: ${{ secrets.DEMO_ROLE }}
+          SF_WAREHOUSE: ${{ secrets.DEV_WH }}
+          SF_DATABASE: ${{ secrets.DEMO_DATABASE }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.DEMO_PASSWORD }}          
+          BRANCH_NAME_FOR_CONFIG: ${{ steps.extract_branch.outputs.branch }}
+        
+        run: |
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          python --version
+          echo "Step 1: Installing schemachange"
+          pip install schemachange
+          
+          echo "Step 2: Running schemachange"
+          schemachange --config-folder snowflake-scripts/etl-pipeline/yaml-configs-for-etl-scripts -f $GITHUB_WORKSPACE/snowflake-scripts/etl-pipeline/etl-scripts -a $SF_ACCOUNT -u $SF_USERNAME -r $SF_ROLE -w $SF_WAREHOUSE -d $SF_DATABASE -c $SF_DATABASE.SCHEMACHANGE_DEV.CHANGE_HISTORY --create-change-history-table
+
+      
+      - name: Run schemachange for PROD
+        if: ${{ steps.extract_branch.outputs.branch == 'PROD' }}
+        env:
+          SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}
+          SF_USERNAME: ${{ secrets.PROD_USERNAME }}
+          SF_ROLE: ${{ secrets.PROD_ROLE }}
+          SF_WAREHOUSE: ${{ secrets.PROD_WH }}
+          SF_DATABASE: ${{ secrets.PROD_DATABASE }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.PROD_PASSWORD }}          
+          BRANCH_NAME_FOR_CONFIG: ${{ steps.extract_branch.outputs.branch }}
+        
+        run: |
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          python --version
+          echo "Step 1: Installing schemachange"
+          pip install schemachange
+          
+          echo "Step 2: Running schemachange"
+          schemachange --config-folder snowflake-scripts/etl-pipeline/yaml-configs-for-etl-scripts -f $GITHUB_WORKSPACE/snowflake-scripts/etl-pipeline/etl-scripts -a $SF_ACCOUNT -u $SF_USERNAME -r $SF_ROLE -w $SF_WAREHOUSE -d $SF_DATABASE -c $SF_DATABASE.SCHEMACHANGE_DEV.CHANGE_HISTORY --create-change-history-table
+
+      
+      
+      - name: Run schemachange for TEST
+        if: ${{ steps.extract_branch.outputs.branch == 'TEST' }}
+        env:
+          SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}
+          SF_USERNAME: ${{ secrets.TEST_USERNAME }}
+          SF_ROLE: ${{ secrets.TEST_ROLE }}
+          SF_WAREHOUSE: ${{ secrets.TEST_WH }}
+          SF_DATABASE: ${{ secrets.TEST_DATABASE }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.TEST_PASSWORD }}          
+          BRANCH_NAME_FOR_CONFIG: ${{ steps.extract_branch.outputs.branch }}
+        
+        run: |
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          python --version
+          echo "Step 1: Installing schemachange"
+          pip install schemachange
+          
+          echo "Step 2: Running schemachange"
+          schemachange --config-folder snowflake-scripts/etl-pipeline/yaml-configs-for-etl-scripts -f $GITHUB_WORKSPACE/snowflake-scripts/etl-pipeline/etl-scripts -a $SF_ACCOUNT -u $SF_USERNAME -r $SF_ROLE -w $SF_WAREHOUSE -d $SF_DATABASE -c $SF_DATABASE.SCHEMACHANGE_DEV.CHANGE_HISTORY --create-change-history-table
+
+        
+      
