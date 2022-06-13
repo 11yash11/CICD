@@ -6,4 +6,4 @@ config-version: 1
 
 
 vars:
-  env: 'PROD'
+  env: 'DEV'
